@@ -16,7 +16,6 @@
       padding-bottom: 3rem;
     }
 
-    /* ── Header ── */
     header {
       background: #3a3a3a;
       color: #fff;
@@ -25,7 +24,6 @@
       font-weight: normal;
     }
 
-    /* ── Page wrapper ── */
     .page {
       max-width: 1100px;
       margin: 18px auto;
@@ -35,7 +33,6 @@
       gap: 14px;
     }
 
-    /* ── Panel (white card) ── */
     .panel {
       background: #fff;
       border: 1px solid #ccc;
@@ -51,14 +48,12 @@
       letter-spacing: 0.02em;
     }
 
-    /* ── Inner box ── */
     .inner-box {
       border: 1px solid #ccc;
       border-radius: 4px;
       margin-bottom: 10px;
     }
 
-    /* ── Two-column input grid ── */
     .input-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -68,7 +63,11 @@
       border-right: 1px solid #e0e0e0;
     }
 
-    /* ── Input row ── */
+    .input-grid .input-row:nth-last-child(-n+2) { border-bottom: none; }
+
+    /* single odd row at the end still needs no bottom border */
+    .input-grid .input-row:last-child { border-bottom: none; }
+
     .input-row {
       display: flex;
       align-items: center;
@@ -76,16 +75,11 @@
       min-height: 42px;
     }
 
-    .input-row:last-child { border-bottom: none; }
-
-    /* For odd-grid rows, the last two also need no border-bottom */
-    .input-grid .input-row:nth-last-child(-n+2) { border-bottom: none; }
-
     .row-label {
       padding: 6px 12px;
       font-weight: bold;
       font-size: 13px;
-      min-width: 175px;
+      min-width: 185px;
       flex-shrink: 0;
       color: #222;
       line-height: 1.3;
@@ -119,11 +113,29 @@
       border-radius: 2px;
     }
 
+    /* auto-calculated field styling */
+    .row-value.auto-val {
+      color: #1565c0;
+      font-weight: bold;
+    }
+
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
     input[type="number"] { -moz-appearance: textfield; }
 
-    /* ── Milestone buttons ── */
+    /* section divider label inside inner-box */
+    .section-divider {
+      background: #f5f5f5;
+      border-bottom: 1px solid #ccc;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #666;
+      grid-column: 1 / -1;
+    }
+
     .milestone-grid {
       display: flex;
       flex-wrap: wrap;
@@ -155,7 +167,6 @@
 
     .ms-pts { font-size: 11px; opacity: 0.75; }
 
-    /* ── Calculate button ── */
     .calc-btn {
       background: #1976d2;
       color: #fff;
@@ -174,7 +185,6 @@
     .calc-btn:hover { background: #1565c0; }
     .calc-btn:active { background: #0d47a1; }
 
-    /* ── Result rows ── */
     .result-row {
       display: flex;
       border-bottom: 1px solid #eee;
@@ -186,7 +196,7 @@
 
     .result-label {
       font-weight: bold;
-      min-width: 240px;
+      min-width: 260px;
       flex-shrink: 0;
       color: #222;
     }
@@ -196,7 +206,6 @@
     .result-val.warn { color: #e65100; font-weight: bold; }
     .result-val.bad  { color: #b71c1c; font-weight: bold; }
 
-    /* progress bar */
     .pb-wrap { padding: 8px 12px; border-bottom: 1px solid #eee; }
     .pb-labels { display: flex; justify-content: space-between; font-size: 12px; color: #555; margin-bottom: 5px; }
     .pb-track { height: 12px; background: #e0e0e0; border-radius: 99px; overflow: hidden; }
@@ -204,7 +213,6 @@
     .pb-fill.warn { background: #e65100; }
     .pb-fill.bad  { background: #b71c1c; }
 
-    /* verdict */
     .verdict-box {
       background: #f5f8ff;
       border-left: 3px solid #1976d2;
@@ -215,7 +223,6 @@
       line-height: 1.6;
     }
 
-    /* day table */
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th {
       text-align: left;
@@ -251,12 +258,20 @@
       line-height: 1.6;
     }
 
+    .ap-note {
+      font-size: 12px;
+      color: #1565c0;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
     @media (max-width: 580px) {
       .input-grid { grid-template-columns: 1fr; }
       .input-grid .input-row:nth-child(odd) { border-right: none; }
       .input-grid .input-row:nth-last-child(-n+2) { border-bottom: 1px solid #e0e0e0; }
       .input-grid .input-row:last-child { border-bottom: none; }
       .result-label { min-width: 160px; }
+      .section-divider { grid-column: 1; }
     }
   </style>
 </head>
@@ -272,6 +287,10 @@
 
     <div class="inner-box">
       <div class="input-grid">
+
+        <!-- EVENT SETTINGS -->
+        <div class="section-divider">Event Settings</div>
+
         <div class="input-row">
           <span class="row-label">Event Format</span>
           <span class="row-value">
@@ -301,12 +320,36 @@
             <input type="number" id="ptsPerRun" value="5000" min="1" /> &nbsp;pt
           </span>
         </div>
+
+        <!-- AP / ENERGY -->
+        <div class="section-divider">AP / Energy</div>
+
         <div class="input-row">
-          <span class="row-label">Runs Per Day (avg)</span>
+          <span class="row-label">Current AP</span>
           <span class="row-value">
-            <input type="number" id="runsPerDay" value="30" min="1" />
+            <input type="number" id="currentAP" min="0" max="10" value="10"
+              oninput="recalcRunsFromAP()" /> &nbsp;/ 10
           </span>
         </div>
+        <div class="input-row">
+          <span class="row-label">Sleep Time</span>
+          <span class="row-value">
+            <input type="number" id="sleepHours" min="0" max="23" step="0.5" value="8"
+              oninput="recalcRunsFromAP()" /> &nbsp;hour(s)
+          </span>
+        </div>
+        <div class="input-row">
+          <span class="row-label">Awake Time</span>
+          <span class="row-value auto-val" id="awakeDisplay">16h 0min</span>
+        </div>
+        <div class="input-row">
+          <span class="row-label">AP Runs Available Today</span>
+          <span class="row-value auto-val" id="apRunsDisplay">42 runs</span>
+        </div>
+
+        <!-- BONUSES -->
+        <div class="section-divider">Bonuses &amp; Overrides</div>
+
         <div class="input-row">
           <span class="row-label">IF Minigame Bonus / Day</span>
           <span class="row-value">
@@ -320,19 +363,32 @@
           </span>
         </div>
         <div class="input-row">
-          <span class="row-label">Custom Point Target</span>
+          <span class="row-label">Manual Run Override</span>
           <span class="row-value">
-            <input type="number" id="customTarget" placeholder="or select milestone below" oninput="clearMilestoneSelection()" /> &nbsp;pt
+            <input type="number" id="runsOverride" min="0" placeholder="leave blank = use AP calc"
+              oninput="onOverrideChange()" />
           </span>
         </div>
+        <div class="input-row">
+          <span class="row-label">Custom Point Target</span>
+          <span class="row-value">
+            <input type="number" id="customTarget" placeholder="or select milestone below"
+              oninput="clearMilestoneSelection()" /> &nbsp;pt
+          </span>
+        </div>
+
       </div>
     </div>
 
-    <div style="font-weight:bold; font-size:13px; margin-bottom:6px;">Target Milestone</div>
+    <div id="apNote" class="ap-note">
+      AP runs calculated from your awake time. 1 AP refills every 30 min — override with Manual Run Override if needed.
+    </div>
+
+    <div style="font-weight:bold; font-size:13px; margin: 10px 0 6px;">Target Milestone</div>
     <div class="milestone-grid" id="milestoneGrid"></div>
 
     <button class="calc-btn" onclick="calculate()">Calculate</button>
-    <div class="footnote">Select a milestone or enter a custom point target. IF minigame gives up to 18,000 pt/day if you correctly guess the liar (playable 6× per event).</div>
+    <div class="footnote">AP cap is 10. 1 AP refills per 30 minutes. IF minigame gives up to 18,000 pt/day (playable 6× per event).</div>
   </div>
 
   <!-- CALCULATION RESULT -->
@@ -345,6 +401,22 @@
 
     <div id="results" class="hidden">
       <div class="inner-box" style="margin-bottom:10px;">
+
+        <div class="section-divider" style="border-radius:3px 3px 0 0;">AP Summary</div>
+        <div class="result-row">
+          <span class="result-label">Awake Time Today</span>
+          <span class="result-val" id="r-awake"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">AP Runs Available Today</span>
+          <span class="result-val" id="r-apruns"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Runs Used for Calculation</span>
+          <span class="result-val" id="r-runsused"></span>
+        </div>
+
+        <div class="section-divider">Points</div>
         <div class="result-row">
           <span class="result-label">Points Still Needed</span>
           <span class="result-val" id="r-needed"></span>
@@ -365,6 +437,7 @@
           <span class="result-label">Runs/Day Required to Hit Goal</span>
           <span class="result-val" id="r-runs"></span>
         </div>
+
       </div>
 
       <div class="pb-wrap">
@@ -384,6 +457,7 @@
         <thead>
           <tr>
             <th>Day</th>
+            <th>AP runs available</th>
             <th>Points after day</th>
             <th>Remaining to goal</th>
             <th>Status</th>
@@ -397,6 +471,9 @@
 </div>
 
 <script>
+  const AP_CAP         = 10;
+  const AP_MINS_PER    = 30;   // 1 AP per 30 min
+
   const MILESTONES = {
     seasonal: [
       { name: "First SR copy",   pts: 400000 },
@@ -408,7 +485,7 @@
       { name: "Full SR + title",   pts: 5500000 },
     ],
     feature: [
-      { name: "Event stage",         pts: 300000 },
+      { name: "Event song",         pts: 300000 },
       { name: "First SSR copy",     pts: 3000000 },
       { name: "Purikura S sticker", pts: 7400000 },
       { name: "Final SSR copy",     pts: 18000000 },
@@ -421,6 +498,33 @@
 
   let selectedMilestone = null;
 
+  /* ── AP calculation ─────────────────────────────────────────── */
+  function calcAPRuns(currentAP, sleepHours) {
+    const awakeHours   = 24 - sleepHours;
+    const awakeMins    = awakeHours * 60;
+    // Every 30 min while awake you can spend 1 AP (it refills and you play again)
+    // Plus whatever AP you start with right now
+    const runsFromRegen = Math.floor(awakeMins / AP_MINS_PER);
+    const totalRuns     = currentAP + runsFromRegen;
+    return { awakeHours, awakeMins, totalRuns };
+  }
+
+  function recalcRunsFromAP() {
+    const currentAP  = parseFloat(document.getElementById("currentAP").value)  || 0;
+    const sleepHours = parseFloat(document.getElementById("sleepHours").value) || 0;
+    const { awakeHours, totalRuns } = calcAPRuns(currentAP, sleepHours);
+
+    const h   = Math.floor(awakeHours);
+    const m   = Math.round((awakeHours - h) * 60);
+    document.getElementById("awakeDisplay").textContent  = `${h}h ${m}min`;
+    document.getElementById("apRunsDisplay").textContent = `${totalRuns} runs`;
+  }
+
+  function onOverrideChange() {
+    // Just a UI hint — actual logic is in calculate()
+  }
+
+  /* ── Milestones ─────────────────────────────────────────────── */
   function onEventTypeChange() {
     renderMilestones();
     selectedMilestone = null;
@@ -451,34 +555,68 @@
 
   function fmt(n) { return Math.round(n).toLocaleString(); }
 
+  /* ── Main calculate ─────────────────────────────────────────── */
   function calculate() {
-    const eventType  = document.getElementById("eventType").value;
-    const daysLeft   = parseInt(document.getElementById("daysLeft").value)    || 10;
-    const currentPts = parseInt(document.getElementById("currentPts").value)  || 0;
-    const ptsPerRun  = parseInt(document.getElementById("ptsPerRun").value)   || 5000;
-    const runsPerDay = parseInt(document.getElementById("runsPerDay").value)  || 30;
-    const miniBonus  = parseInt(document.getElementById("miniBonus").value)   || 0;
-    const otherBonus = parseInt(document.getElementById("otherBonus").value)  || 0;
-    const customPts  = parseInt(document.getElementById("customTarget").value)|| 0;
+    const eventType    = document.getElementById("eventType").value;
+    const daysLeft     = parseInt(document.getElementById("daysLeft").value)     || 10;
+    const currentPts   = parseInt(document.getElementById("currentPts").value)   || 0;
+    const ptsPerRun    = parseInt(document.getElementById("ptsPerRun").value)    || 5000;
+    const currentAP    = parseFloat(document.getElementById("currentAP").value)  || 0;
+    const sleepHours   = parseFloat(document.getElementById("sleepHours").value) || 0;
+    const miniBonus    = parseInt(document.getElementById("miniBonus").value)    || 0;
+    const otherBonus   = parseInt(document.getElementById("otherBonus").value)   || 0;
+    const runsOverride = parseInt(document.getElementById("runsOverride").value) || 0;
+    const customPts    = parseInt(document.getElementById("customTarget").value) || 0;
 
     const target = customPts || selectedMilestone;
     if (!target) { alert("Please select a milestone or enter a custom point target."); return; }
 
-    const ptsPerDay      = (ptsPerRun * runsPerDay) + miniBonus + otherBonus;
-    const ptsNeeded      = Math.max(0, target - currentPts);
-    const projectedTotal = currentPts + (ptsPerDay * daysLeft);
+    // AP-based runs for today (day 1); subsequent days start with full AP each morning
+    const { awakeHours, totalRuns: apRunsToday } = calcAPRuns(currentAP, sleepHours);
+
+    // For future days: you wake up with full AP (10) + regen during awake time
+    // but practically the cap means max useful regen per day = awake minutes / 30
+    // You can never hold more than AP_CAP so runs per full day = floor(awakeMins/30) + AP_CAP
+    // But you drain as fast as you regen so it simplifies to: runs/day = awakeMins/30
+    const awakeMinsPerDay = (24 - sleepHours) * 60;
+    const apRunsFullDay   = Math.floor(awakeMinsPerDay / AP_MINS_PER);
+
+    // Use override if given, otherwise AP calculation
+    const runsToday   = runsOverride > 0 ? runsOverride : apRunsToday;
+    const runsPerDay  = runsOverride > 0 ? runsOverride : apRunsFullDay;
+    const usingOverride = runsOverride > 0;
+
+    const ptsPerDay      = (runsPerDay * ptsPerRun) + miniBonus + otherBonus;
+    const ptsTodayOnly   = (runsToday * ptsPerRun) + miniBonus + otherBonus;
+
+    // Day 1 uses today's available AP, remaining days use full-day AP
+    const projectedTotal = currentPts + ptsTodayOnly + (ptsPerDay * (daysLeft - 1));
     const projectedPct   = Math.min(100, Math.round((projectedTotal / target) * 100));
+    const ptsNeeded      = Math.max(0, target - currentPts);
     const daysNeeded     = ptsNeeded > 0 ? ptsNeeded / ptsPerDay : 0;
     const onTrack        = projectedTotal >= target;
-    const runsNeeded     = ptsNeeded > 0 ? Math.ceil(ptsNeeded / (daysLeft * ptsPerRun)) : runsPerDay;
+    const runsNeeded     = ptsNeeded > 0
+      ? Math.ceil((ptsNeeded - ptsTodayOnly) / (Math.max(daysLeft - 1, 1) * ptsPerRun))
+      : runsPerDay;
 
     document.getElementById("resultEmpty").classList.add("hidden");
     document.getElementById("results").classList.remove("hidden");
 
     const sc = onTrack ? "good" : (daysNeeded <= daysLeft * 1.25 ? "warn" : "bad");
 
+    // AP summary rows
+    const h = Math.floor(awakeHours);
+    const m = Math.round((awakeHours - h) * 60);
+    document.getElementById("r-awake").textContent   = `${h}h ${m}min (sleeping ${sleepHours}h)`;
+    document.getElementById("r-apruns").textContent  = `${apRunsToday} runs today / ${apRunsFullDay} runs on a full day`;
+    document.getElementById("r-runsused").textContent = usingOverride
+      ? `${runsToday} runs/day (manual override)`
+      : `${runsToday} today, then ${runsPerDay}/day (from AP)`;
+
+    // Points rows
     document.getElementById("r-needed").textContent = `${fmt(ptsNeeded)} pt`;
-    document.getElementById("r-ppd").textContent    = `${fmt(ptsPerDay)} pt  (${fmt(runsPerDay)} runs × ${fmt(ptsPerRun)} pt + ${fmt(miniBonus + otherBonus)} pt bonus)`;
+    document.getElementById("r-ppd").textContent    =
+      `${fmt(ptsPerDay)} pt  (${runsPerDay} runs × ${fmt(ptsPerRun)} pt + ${fmt(miniBonus + otherBonus)} pt bonus)`;
 
     const projEl = document.getElementById("r-proj");
     projEl.textContent = `${fmt(projectedTotal)} pt`;
@@ -489,10 +627,14 @@
     daysEl.className   = `result-val ${onTrack ? "good" : "bad"}`;
 
     const runsEl = document.getElementById("r-runs");
-    runsEl.textContent = onTrack
-      ? `${runsPerDay} runs/day is enough (${fmt(projectedTotal - target)} pt to spare)`
-      : `${runsNeeded} runs/day required (${runsNeeded - runsPerDay} more than current)`;
-    runsEl.className = `result-val ${onTrack ? "good" : "warn"}`;
+    if (onTrack) {
+      runsEl.textContent = `${runsPerDay} runs/day is enough (${fmt(projectedTotal - target)} pt to spare)`;
+      runsEl.className   = "result-val good";
+    } else {
+      const neededFull = Math.ceil(ptsNeeded / (daysLeft * ptsPerRun));
+      runsEl.textContent = `~${neededFull} runs/day needed (${neededFull - runsPerDay} more than AP gives you)`;
+      runsEl.className   = "result-val warn";
+    }
 
     const pbFill = document.getElementById("pbFill");
     pbFill.style.width = projectedPct + "%";
@@ -501,29 +643,42 @@
     document.getElementById("pbRight").textContent = `Goal: ${fmt(target)} pt`;
 
     let verdict = onTrack
-      ? `You are on track. At ${runsPerDay} runs/day you will hit your goal with ${fmt(projectedTotal - target)} pt to spare.`
-      : `You will fall short by ${fmt(target - projectedTotal)} pt at your current pace. Increase to ${runsNeeded} runs/day to reach your goal in time.`;
+      ? `You are on track! With ${runsToday} AP runs today and ${runsPerDay} runs/day after that, you will hit your goal with ${fmt(projectedTotal - target)} pt to spare.`
+      : `You will fall short by ${fmt(target - projectedTotal)} pt at your current AP pace. You would need more runs per day than your awake time allows — consider using AP refill items if available.`;
     if (eventType === "if" && miniBonus === 0)
       verdict += " Reminder: IF events have a daily minigame worth up to 18,000 pt — enter that in the IF Minigame Bonus field above!";
     document.getElementById("verdictBox").textContent = verdict;
 
+    // Day-by-day table
     const tbody = document.getElementById("dayTable");
     tbody.innerHTML = "";
+    let runningPts = currentPts;
     for (let d = 1; d <= daysLeft; d++) {
-      const pts  = currentPts + (ptsPerDay * d);
-      const rem  = Math.max(0, target - pts);
-      const done  = pts >= target;
+      const runs = (d === 1) ? runsToday : runsPerDay;
+      const gained = (runs * ptsPerRun) + miniBonus + otherBonus;
+      runningPts += gained;
+      const rem   = Math.max(0, target - runningPts);
+      const done  = runningPts >= target;
       const close = !done && rem < ptsPerDay * 2;
       const tag   = done  ? `<span class="tag green">goal reached</span>`
                   : close ? `<span class="tag amber">almost there</span>`
                   : `—`;
-      tbody.innerHTML += `<tr><td>Day ${d}</td><td>${fmt(pts)} pt</td><td>${fmt(rem)} pt</td><td>${tag}</td></tr>`;
+      tbody.innerHTML += `
+        <tr>
+          <td>Day ${d}${d === 1 ? ' <span style="font-size:11px;color:#888;">(today)</span>' : ''}</td>
+          <td>${runs} runs</td>
+          <td>${fmt(runningPts)} pt</td>
+          <td>${fmt(rem)} pt</td>
+          <td>${tag}</td>
+        </tr>`;
     }
 
     document.getElementById("results").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  // Init
   renderMilestones();
+  recalcRunsFromAP();
 </script>
 
 </body>
