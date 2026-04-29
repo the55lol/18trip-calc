@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>18TRIP Event Point Calculator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #ffffcc;
+      color: #111;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #3a3a3a;
+      color: #fff;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: normal;
+    }
+
+    /* ── Page wrapper ── */
+    .page {
+      max-width: 1100px;
+      margin: 18px auto;
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── Panel (white card) ── */
+    .panel {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 16px 20px;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Inner box ── */
+    .inner-box {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    /* ── Two-column input grid ── */
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .input-grid .input-row:nth-child(odd) {
+      border-right: 1px solid #e0e0e0;
+    }
+
+    /* ── Input row ── */
+    .input-row {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0;
+      min-height: 42px;
+    }
+
+    .input-row:last-child { border-bottom: none; }
+
+    /* For odd-grid rows, the last two also need no border-bottom */
+    .input-grid .input-row:nth-last-child(-n+2) { border-bottom: none; }
+
+    .row-label {
+      padding: 6px 12px;
+      font-weight: bold;
+      font-size: 13px;
+      min-width: 175px;
+      flex-shrink: 0;
+      color: #222;
+      line-height: 1.3;
+    }
+
+    .row-value {
+      padding: 6px 10px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #333;
+      font-size: 13px;
+    }
+
+    .row-value input[type="number"],
+    .row-value select {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+      color: #333;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .row-value input[type="number"]:focus,
+    .row-value select:focus {
+      background: #f5f8ff;
+      border-radius: 2px;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    /* ── Milestone buttons ── */
+    .milestone-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .milestone-btn {
+      padding: 5px 13px;
+      border: 1px solid #bbb;
+      border-radius: 3px;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: Arial, sans-serif;
+      color: #333;
+      text-align: left;
+      line-height: 1.4;
+      transition: background 0.1s, border-color 0.1s;
+    }
+
+    .milestone-btn:hover { background: #e8e8e8; border-color: #888; }
+
+    .milestone-btn.active {
+      background: #1565c0;
+      color: #fff;
+      border-color: #1565c0;
+    }
+
+    .ms-pts { font-size: 11px; opacity: 0.75; }
+
+    /* ── Calculate button ── */
+    .calc-btn {
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      padding: 7px 20px;
+      font-size: 13px;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .calc-btn:hover { background: #1565c0; }
+    .calc-btn:active { background: #0d47a1; }
+
+    /* ── Result rows ── */
+    .result-row {
+      display: flex;
+      border-bottom: 1px solid #eee;
+      padding: 7px 12px;
+      font-size: 13px;
+    }
+
+    .result-row:last-child { border-bottom: none; }
+
+    .result-label {
+      font-weight: bold;
+      min-width: 240px;
+      flex-shrink: 0;
+      color: #222;
+    }
+
+    .result-val { color: #333; flex: 1; }
+    .result-val.good { color: #2e7d32; font-weight: bold; }
+    .result-val.warn { color: #e65100; font-weight: bold; }
+    .result-val.bad  { color: #b71c1c; font-weight: bold; }
+
+    /* progress bar */
+    .pb-wrap { padding: 8px 12px; border-bottom: 1px solid #eee; }
+    .pb-labels { display: flex; justify-content: space-between; font-size: 12px; color: #555; margin-bottom: 5px; }
+    .pb-track { height: 12px; background: #e0e0e0; border-radius: 99px; overflow: hidden; }
+    .pb-fill  { height: 100%; background: #1976d2; border-radius: 99px; transition: width 0.45s; }
+    .pb-fill.warn { background: #e65100; }
+    .pb-fill.bad  { background: #b71c1c; }
+
+    /* verdict */
+    .verdict-box {
+      background: #f5f8ff;
+      border-left: 3px solid #1976d2;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #333;
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+
+    /* day table */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left;
+      padding: 6px 12px;
+      background: #f0f0f0;
+      border-bottom: 1px solid #ccc;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #444;
+    }
+    td { padding: 6px 12px; border-bottom: 1px solid #eee; color: #333; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .tag {
+      display: inline-block;
+      padding: 1px 9px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .tag.green { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .tag.amber { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+
+    .hidden { display: none; }
+
+    .footnote {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 580px) {
+      .input-grid { grid-template-columns: 1fr; }
+      .input-grid .input-row:nth-child(odd) { border-right: none; }
+      .input-grid .input-row:nth-last-child(-n+2) { border-bottom: 1px solid #e0e0e0; }
+      .input-grid .input-row:last-child { border-bottom: none; }
+      .result-label { min-width: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>18TRIP Event Point Calculator</header>
+
+<div class="page">
+
+  <!-- INPUT PARAMETERS -->
+  <div class="panel">
+    <div class="panel-title">Input Parameters</div>
+
+    <div class="inner-box">
+      <div class="input-grid">
+        <div class="input-row">
+          <span class="row-label">Event Format</span>
+          <span class="row-value">
+            <select id="eventType" onchange="onEventTypeChange()">
+              <option value="seasonal">Seasonal (10 days)</option>
+              <option value="team">Team Seasonal (10 days)</option>
+              <option value="feature">Feature (10 days)</option>
+              <option value="if">IF Event (10 days)</option>
+            </select>
+          </span>
+        </div>
+        <div class="input-row">
+          <span class="row-label">Days Remaining</span>
+          <span class="row-value">
+            <input type="number" id="daysLeft" min="1" max="10" value="10" /> &nbsp;day(s)
+          </span>
+        </div>
+        <div class="input-row">
+          <span class="row-label">Current Event Points</span>
+          <span class="row-value">
+            <input type="number" id="currentPts" value="0" min="0" /> &nbsp;pt
+          </span>
+        </div>
+        <div class="input-row">
+          <span class="row-label">Points Per Run</span>
+          <span class="row-value">
+            <input type="number" id="ptsPerRun" value="5000" min="1" /> &nbsp;pt
+          </span>
+        </div>
+        <div class="input-row">
+          <span class="row-label">Runs Per Day (avg)</span>
+          <span class="row-value">
+            <input type="number" id="runsPerDay" value="30" min="1" />
+          </span>
+        </div>
+        <div class="input-row">
+          <span class="row-label">IF Minigame Bonus / Day</span>
+          <span class="row-value">
+            <input type="number" id="miniBonus" value="0" min="0" /> &nbsp;pt
+          </span>
+        </div>
+        <div class="input-row">
+          <span class="row-label">Other Daily Bonus</span>
+          <span class="row-value">
+            <input type="number" id="otherBonus" value="0" min="0" /> &nbsp;pt
+          </span>
+        </div>
+        <div class="input-row">
+          <span class="row-label">Custom Point Target</span>
+          <span class="row-value">
+            <input type="number" id="customTarget" placeholder="or select milestone below" oninput="clearMilestoneSelection()" /> &nbsp;pt
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-weight:bold; font-size:13px; margin-bottom:6px;">Target Milestone</div>
+    <div class="milestone-grid" id="milestoneGrid"></div>
+
+    <button class="calc-btn" onclick="calculate()">Calculate</button>
+    <div class="footnote">Select a milestone or enter a custom point target. IF minigame gives up to 18,000 pt/day if you correctly guess the liar (playable 6× per event).</div>
+  </div>
+
+  <!-- CALCULATION RESULT -->
+  <div class="panel">
+    <div class="panel-title">Calculation Result</div>
+
+    <div id="resultEmpty" style="color:#888; font-size:13px; padding:4px 0;">
+      Enter your stats above and click Calculate.
+    </div>
+
+    <div id="results" class="hidden">
+      <div class="inner-box" style="margin-bottom:10px;">
+        <div class="result-row">
+          <span class="result-label">Points Still Needed</span>
+          <span class="result-val" id="r-needed"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Points Per Day (at current pace)</span>
+          <span class="result-val" id="r-ppd"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Projected Total by End of Event</span>
+          <span class="result-val" id="r-proj"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Days Needed vs Days Remaining</span>
+          <span class="result-val" id="r-days"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Runs/Day Required to Hit Goal</span>
+          <span class="result-val" id="r-runs"></span>
+        </div>
+      </div>
+
+      <div class="pb-wrap">
+        <div class="pb-labels">
+          <span id="pbLeft"></span>
+          <span id="pbRight"></span>
+        </div>
+        <div class="pb-track">
+          <div class="pb-fill" id="pbFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="verdict-box" id="verdictBox"></div>
+
+      <div style="font-weight:bold; font-size:13px; margin: 10px 0 6px; text-transform:uppercase; letter-spacing:0.02em;">Day-by-Day Breakdown</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Points after day</th>
+            <th>Remaining to goal</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="dayTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const MILESTONES = {
+    seasonal: [
+      { name: "First SR copy",   pts: 400000 },
+      { name: "Full SR + title", pts: 4500000 },
+    ],
+    team: [
+      { name: "First SR copy",     pts: 400000 },
+      { name: "Scrapbook sticker", pts: 1300000 },
+      { name: "Full SR + title",   pts: 5500000 },
+    ],
+    feature: [
+      { name: "Event song",         pts: 300000 },
+      { name: "First SSR copy",     pts: 3000000 },
+      { name: "Purikura S sticker", pts: 7400000 },
+      { name: "Final SSR copy",     pts: 18000000 },
+    ],
+    if: [
+      { name: "First SR copy",   pts: 400000 },
+      { name: "Full SR + title", pts: 4500000 },
+    ],
+  };
+
+  let selectedMilestone = null;
+
+  function onEventTypeChange() {
+    renderMilestones();
+    selectedMilestone = null;
+  }
+
+  function renderMilestones() {
+    const type = document.getElementById("eventType").value;
+    const grid = document.getElementById("milestoneGrid");
+    grid.innerHTML = "";
+    MILESTONES[type].forEach((m) => {
+      const btn = document.createElement("button");
+      btn.className = "milestone-btn";
+      btn.innerHTML = `<div>${m.name}</div><div class="ms-pts">${m.pts.toLocaleString()} pt</div>`;
+      btn.onclick = () => {
+        document.querySelectorAll(".milestone-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedMilestone = m.pts;
+        document.getElementById("customTarget").value = "";
+      };
+      grid.appendChild(btn);
+    });
+  }
+
+  function clearMilestoneSelection() {
+    document.querySelectorAll(".milestone-btn").forEach(b => b.classList.remove("active"));
+    selectedMilestone = null;
+  }
+
+  function fmt(n) { return Math.round(n).toLocaleString(); }
+
+  function calculate() {
+    const eventType  = document.getElementById("eventType").value;
+    const daysLeft   = parseInt(document.getElementById("daysLeft").value)    || 10;
+    const currentPts = parseInt(document.getElementById("currentPts").value)  || 0;
+    const ptsPerRun  = parseInt(document.getElementById("ptsPerRun").value)   || 5000;
+    const runsPerDay = parseInt(document.getElementById("runsPerDay").value)  || 30;
+    const miniBonus  = parseInt(document.getElementById("miniBonus").value)   || 0;
+    const otherBonus = parseInt(document.getElementById("otherBonus").value)  || 0;
+    const customPts  = parseInt(document.getElementById("customTarget").value)|| 0;
+
+    const target = customPts || selectedMilestone;
+    if (!target) { alert("Please select a milestone or enter a custom point target."); return; }
+
+    const ptsPerDay      = (ptsPerRun * runsPerDay) + miniBonus + otherBonus;
+    const ptsNeeded      = Math.max(0, target - currentPts);
+    const projectedTotal = currentPts + (ptsPerDay * daysLeft);
+    const projectedPct   = Math.min(100, Math.round((projectedTotal / target) * 100));
+    const daysNeeded     = ptsNeeded > 0 ? ptsNeeded / ptsPerDay : 0;
+    const onTrack        = projectedTotal >= target;
+    const runsNeeded     = ptsNeeded > 0 ? Math.ceil(ptsNeeded / (daysLeft * ptsPerRun)) : runsPerDay;
+
+    document.getElementById("resultEmpty").classList.add("hidden");
+    document.getElementById("results").classList.remove("hidden");
+
+    const sc = onTrack ? "good" : (daysNeeded <= daysLeft * 1.25 ? "warn" : "bad");
+
+    document.getElementById("r-needed").textContent = `${fmt(ptsNeeded)} pt`;
+    document.getElementById("r-ppd").textContent    = `${fmt(ptsPerDay)} pt  (${fmt(runsPerDay)} runs × ${fmt(ptsPerRun)} pt + ${fmt(miniBonus + otherBonus)} pt bonus)`;
+
+    const projEl = document.getElementById("r-proj");
+    projEl.textContent = `${fmt(projectedTotal)} pt`;
+    projEl.className   = `result-val ${sc}`;
+
+    const daysEl = document.getElementById("r-days");
+    daysEl.textContent = `${daysNeeded.toFixed(1)} days needed — ${daysLeft} remaining`;
+    daysEl.className   = `result-val ${onTrack ? "good" : "bad"}`;
+
+    const runsEl = document.getElementById("r-runs");
+    runsEl.textContent = onTrack
+      ? `${runsPerDay} runs/day is enough (${fmt(projectedTotal - target)} pt to spare)`
+      : `${runsNeeded} runs/day required (${runsNeeded - runsPerDay} more than current)`;
+    runsEl.className = `result-val ${onTrack ? "good" : "warn"}`;
+
+    const pbFill = document.getElementById("pbFill");
+    pbFill.style.width = projectedPct + "%";
+    pbFill.className   = "pb-fill" + (onTrack ? "" : projectedPct >= 75 ? " warn" : " bad");
+    document.getElementById("pbLeft").textContent  = `Projected: ${fmt(projectedTotal)} pt (${projectedPct}% of goal)`;
+    document.getElementById("pbRight").textContent = `Goal: ${fmt(target)} pt`;
+
+    let verdict = onTrack
+      ? `You are on track. At ${runsPerDay} runs/day you will hit your goal with ${fmt(projectedTotal - target)} pt to spare.`
+      : `You will fall short by ${fmt(target - projectedTotal)} pt at your current pace. Increase to ${runsNeeded} runs/day to reach your goal in time.`;
+    if (eventType === "if" && miniBonus === 0)
+      verdict += " Reminder: IF events have a daily minigame worth up to 18,000 pt — enter that in the IF Minigame Bonus field above!";
+    document.getElementById("verdictBox").textContent = verdict;
+
+    const tbody = document.getElementById("dayTable");
+    tbody.innerHTML = "";
+    for (let d = 1; d <= daysLeft; d++) {
+      const pts  = currentPts + (ptsPerDay * d);
+      const rem  = Math.max(0, target - pts);
+      const done  = pts >= target;
+      const close = !done && rem < ptsPerDay * 2;
+      const tag   = done  ? `<span class="tag green">goal reached</span>`
+                  : close ? `<span class="tag amber">almost there</span>`
+                  : `—`;
+      tbody.innerHTML += `<tr><td>Day ${d}</td><td>${fmt(pts)} pt</td><td>${fmt(rem)} pt</td><td>${tag}</td></tr>`;
+    }
+
+    document.getElementById("results").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  renderMilestones();
+</script>
+
+</body>
+</html>
